@@ -107,12 +107,8 @@ public class PokeApiController extends PokeAbstractController{
                 list.add(anEntry);
             }
 
-            //sortedBody.put(values);
-            //JSONObject sortedBody = (JSONObject) new JSONParser().parse(list.toJSONString());
-            JSONObject sortedBody = new JSONObject();
-            sortedBody.put("data", list);
-            System.out.println(sortedBody);
-            this.body = sortedBody;
+            body.put("data", list);
+            System.out.println(body);
             this.status = HttpStatus.OK;
         } catch (Exception e) {
             e.printStackTrace();
