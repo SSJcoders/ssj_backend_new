@@ -3,7 +3,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -21,21 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 public class PokeApiController {
 
-    private static void alphabeticallySort(ArrayList<Map<String, String>> list) {
-        int n = list.size();
-        
-
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - i - 1; j++) {
-                // Compare adjacent names and swap if they are in the wrong order
-                if (list.get(j).get("name").compareTo(list.get(j + 1).get("name")) > 0) {
-                    Map<String, String> temp = list.get(j);
-                    list.set(j, list.get(j + 1));
-                    list.set(j + 1, temp);
-                }
-            }
-        }
-    }
     private JSONObject body = new JSONObject(); //last run result
     private HttpStatus status; //last run status
     
