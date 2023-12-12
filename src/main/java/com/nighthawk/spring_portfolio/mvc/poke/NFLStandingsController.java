@@ -1,15 +1,17 @@
 package com.nighthawk.spring_portfolio.mvc.poke;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.http.HttpStatus;
@@ -33,31 +35,31 @@ public class NFLStandingsController extends PokeAbstractController {
 	public ResponseEntity<JSONObject> getUnsortedData() {
 		return null;
 	}
-	
+
 	// cached data to avoid paid api calls to get fresh data
-	public static final String NFL_STANDINGS = "";
-	
+	public static String NFL_STANDINGS = "";
+	static {
+		try {
+			URL path = Test.class.getResource("nflstandings.json");
+			File f = new File(path.getFile());
+			BufferedReader br = new BufferedReader(new FileReader(f));
+			String nflData = br.readLine();
+			NFL_STANDINGS = nflData;
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+	}
 
 	// GET NFL Stats - sorted
 	@GetMapping(value = { "/sorted/", "/sorted/{sortKey}/{sortOrder}/{algorithm}" })
 	public ResponseEntity<JSONObject> getSortedData(@PathVariable(required = false) String sortKey,
 			@PathVariable(required = false) String sortOrder, @PathVariable(required = false) String algorithm) {
 
-		try { // APIs can fail (ie Internet or Service down)
+		try { 
+			if (NFL_STANDINGS.length() == 0) {
+				readNFLData();
+			}
 
-			/*
-			 * HttpRequest request = HttpRequest.newBuilder()
-			 * .uri(URI.create("https://nfl-team-stats1.p.rapidapi.com/teamStats"))
-			 * .header("X-RapidAPI-Key",
-			 * "3aa60a1cb9msh07c4f9a1dcbe87bp1f7a8fjsne20cc9c3e9f1")
-			 * .header("X-RapidAPI-Host", "nfl-team-stats1.p.rapidapi.com") .method("GET",
-			 * HttpRequest.BodyPublishers.noBody()) .build(); HttpResponse<String> response
-			 * = HttpClient.newHttpClient().send(request,
-			 * HttpResponse.BodyHandlers.ofString());
-			 */
-			// JSONParser extracts text body and parses to JSONObject
-			// JSONObject originalBody = (JSONObject) new
-			// JSONParser().parse(response.body());
 			JSONObject originalBody = (JSONObject) new JSONParser().parse(NFL_STANDINGS);
 
 			// Extracting the list of NFL Team stats
@@ -85,59 +87,20 @@ public class NFLStandingsController extends PokeAbstractController {
 		return new ResponseEntity<>(body, status);
 	}
 
-	@GetMapping("/api/nflstandings/sorted") // added to end of prefix as endpoint
-	public ResponseEntity<JSONObject> getPokemonInAlphabetOrder() {
+	private void readNFLData() throws IOException, InterruptedException {
 
-		try {
-			HttpRequest request = HttpRequest.newBuilder()
-					.uri(URI.create("https://pokeapi.co/api/v2/pokemon?limit=5000"))
-					.method("GET", HttpRequest.BodyPublishers.noBody()).build();
-
-			HttpResponse<String> response = HttpClient.newHttpClient().send(request,
-					HttpResponse.BodyHandlers.ofString());
-
-			// JSONParser extracts text body and parses to JSONObject
-			JSONObject originalBody = (JSONObject) new JSONParser().parse(response.body());
-
-			// Extracting the list of Pokemon names
-			JSONArray originalPokemonList = (JSONArray) originalBody.get("results");
-
-			Map<String, Map<String, String>> pokemonNames = new TreeMap<String, Map<String, String>>();
-
-			for (Object pokemonObj : originalPokemonList) {
-				Map<String, String> dict = new HashMap<>();
-				JSONObject pokemon = (JSONObject) pokemonObj;
-				String pokemonName = (String) pokemon.get("name");
-				String pokemonUrl = (String) pokemon.get("url");
-				dict.put("name", pokemonName);
-				dict.put("url", pokemonUrl);
-				pokemonNames.put(pokemonName, dict);
-			}
-			System.out.println(pokemonNames);
-			// Creating a new JSON object with sorted Pokemon names
-			JSONObject sortedBody = new JSONObject();
-			sortedBody.put("pokemon", pokemonNames);
-			System.out.println(sortedBody);
-			this.body = sortedBody;
-			this.status = HttpStatus.OK;
-		} catch (Exception e) {
-			HashMap<String, String> status = new HashMap<>();
-			status.put("status", "RapidApi failure: " + e);
-
-			// Setup object for error
-			this.body = (JSONObject) status;
-			this.status = HttpStatus.INTERNAL_SERVER_ERROR;
-		}
-
-		// return JSONObject in RESTful style
-		return new ResponseEntity<>(body, status);
+		HttpRequest request = HttpRequest.newBuilder()
+				.uri(URI.create("https://nfl-team-stats1.p.rapidapi.com/teamStats"))
+				.header("X-RapidAPI-Key", "3aa60a1cb9msh07c4f9a1dcbe87bp1f7a8fjsne20cc9c3e9f1")
+				.header("X-RapidAPI-Host", "nfl-team-stats1.p.rapidapi.com")
+				.method("GET", HttpRequest.BodyPublishers.noBody()).build();
+		HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+		NFL_STANDINGS = response.body();
 	}
 
 	public static void main(String args) {
-
 		NFLStandingsController c = new NFLStandingsController();
 		c.getSortedData("a", "b", "c");
 	}
-	
-	
+
 }
