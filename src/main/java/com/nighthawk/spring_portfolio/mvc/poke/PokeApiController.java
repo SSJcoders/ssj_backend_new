@@ -17,18 +17,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController // annotation to create a RESTful web services
-
-public class PokeApiController {
+@RequestMapping("/api/poke")
+public class PokeApiController extends PokeAbstractController{
 
     private JSONObject body = new JSONObject(); //last run result
     private HttpStatus status; //last run status
     
     // GET Covid 19 Stats
-    @GetMapping("/api/poke")   //added to end of prefix as endpoint
+    @GetMapping("/")   //added to end of prefix as endpoint
     @CrossOrigin(origins = "http://localhost:8080")
-
-    public ResponseEntity<JSONObject> getCovid() {
-
+    public ResponseEntity<JSONObject> getUnsortedData() {
          try {  //APIs can fail (ie Internet or Service down)
              
             HttpRequest request = HttpRequest.newBuilder()
@@ -58,10 +56,11 @@ public class PokeApiController {
      return new ResponseEntity<>(body, status);
     }
 
-    @GetMapping("/api/poke/alphabet")   //added to end of prefix as endpoint
+    // note: retaining alphabet mapping for backward compatibility until view is fixed
+    @GetMapping(value = { "/alphabet/","/sorted/", "/sorted/{sortKey}/{sortOrder}/{algorithm}" })   //added to end of prefix as endpoint
     @CrossOrigin(origins = "http://localhost:8080")
-
-    public ResponseEntity<JSONObject> getPokemonInAlphabetOrder() {
+    public ResponseEntity<JSONObject> getSortedData(@PathVariable(required = false) String sortKey,
+			@PathVariable(required = false) String sortOrder, @PathVariable(required = false) String algorithm) {
 
         try {
             HttpRequest request = HttpRequest.newBuilder()
