@@ -10,8 +10,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -110,6 +112,7 @@ public class NFLStandingsController extends PokeAbstractController {
 			JSONObject stats = (JSONObject) originalBody.get("stats");
 			Set<Entry<String, Object>> teams = stats.entrySet();
 			JSONArray teamsStandings = new JSONArray();
+			Map<String, JSONObject> dataToSort = new TreeMap<String, JSONObject>();
 
 			for (Entry<String, Object> team : teams) {
 				String teamName = team.getKey();
@@ -119,10 +122,15 @@ public class NFLStandingsController extends PokeAbstractController {
 				JSONObject teamStanding = getTeamStanding(teamStatJSON);
 
 				if (teamStanding != null) {
-					teamsStandings.add(teamStanding);
+					//teamsStandings.add(teamStanding);
+					dataToSort.put(teamName, teamStanding);
 				} else {
 					System.out.println("Team Name: " + teamName + " are missing standings data.");
 				}
+			}
+			
+			for (Entry<String, JSONObject> entry : dataToSort.entrySet()) {
+				teamsStandings.add(entry.getValue());
 			}
 
 			body.put("data", teamsStandings);
