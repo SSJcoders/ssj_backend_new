@@ -24,7 +24,7 @@ public class PokeApiController extends PokeAbstractController{
     private HttpStatus status; //last run status
     
     // GET Covid 19 Stats
-    @GetMapping("/")   //added to end of prefix as endpoint
+    @GetMapping(value = {"","/"})   //added to end of prefix as endpoint
     @CrossOrigin(origins = "http://localhost:8080")
     public ResponseEntity<JSONObject> getUnsortedData() {
          try {  //APIs can fail (ie Internet or Service down)
@@ -57,7 +57,7 @@ public class PokeApiController extends PokeAbstractController{
     }
 
     // note: retaining alphabet mapping for backward compatibility until view is fixed
-    @GetMapping(value = { "/alphabet/","/sorted/", "/sorted/{sortKey}/{sortOrder}/{algorithm}" })   //added to end of prefix as endpoint
+    @GetMapping(value = { "/alphabet/","/alphabet","/sorted/","/sorted", "/sorted/{sortKey}/{sortOrder}/{algorithm}" })   //added to end of prefix as endpoint
     @CrossOrigin(origins = "http://localhost:8080")
     public ResponseEntity<JSONObject> getSortedData(@PathVariable(required = false) String sortKey,
 			@PathVariable(required = false) String sortOrder, @PathVariable(required = false) String algorithm) {

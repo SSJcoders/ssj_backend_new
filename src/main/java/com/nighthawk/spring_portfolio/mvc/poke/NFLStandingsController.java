@@ -9,6 +9,8 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,7 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NFLStandingsController extends PokeAbstractController {
 	// cached data to avoid paid api calls to get fresh data
 	public static String NFL_STANDINGS = "";
-	
+
 	static {
 		BufferedReader br = null;
 		try {
@@ -56,7 +58,7 @@ public class NFLStandingsController extends PokeAbstractController {
 	private HttpStatus status; // last run status
 
 	// GET NFL Stats - unsorted
-	@GetMapping("/") // added to end of prefix as endpoint
+	@GetMapping(value = { "/", "" }) // added to end of prefix as endpoint
 	@CrossOrigin(origins = "http://localhost:8080")
 	public ResponseEntity<JSONObject> getUnsortedData() {
 		try {
@@ -99,7 +101,7 @@ public class NFLStandingsController extends PokeAbstractController {
 	}
 
 	// GET NFL Stats - sorted
-	@GetMapping(value = { "/sorted/", "/sorted/{sortKey}/{sortOrder}/{algorithm}" })
+	@GetMapping(value = { "/sorted/", "/sorted", "/sorted/{sortKey}/{sortOrder}/{algorithm}" })
 	public ResponseEntity<JSONObject> getSortedData(@PathVariable(required = false) String sortKey,
 			@PathVariable(required = false) String sortOrder, @PathVariable(required = false) String algorithm) {
 
@@ -111,7 +113,7 @@ public class NFLStandingsController extends PokeAbstractController {
 			JSONObject originalBody = (JSONObject) new JSONParser().parse(NFL_STANDINGS);
 			JSONObject stats = (JSONObject) originalBody.get("stats");
 			Set<Entry<String, Object>> teams = stats.entrySet();
-			JSONArray teamsStandings = new JSONArray();
+
 			Map<String, JSONObject> dataToSort = new TreeMap<String, JSONObject>();
 
 			for (Entry<String, Object> team : teams) {
@@ -122,17 +124,67 @@ public class NFLStandingsController extends PokeAbstractController {
 				JSONObject teamStanding = getTeamStanding(teamStatJSON);
 
 				if (teamStanding != null) {
-					//teamsStandings.add(teamStanding);
+					// teamsStandings.add(teamStanding);
 					dataToSort.put(teamName, teamStanding);
+
 				} else {
 					System.out.println("Team Name: " + teamName + " are missing standings data.");
 				}
 			}
-			
+
+			JSONArray teamsStandings = new JSONArray();
+
 			for (Entry<String, JSONObject> entry : dataToSort.entrySet()) {
 				teamsStandings.add(entry.getValue());
 			}
 
+			if (sortKey != null) {
+				System.out.println("Sorting on: " + sortKey + ". Sort Order: " + sortOrder);
+
+				Collections.sort(teamsStandings, new Comparator<JSONObject>() {
+
+					public int compare(JSONObject o1, JSONObject o2) {
+						String tempSortKey = sortKey;
+						
+						if (tempSortKey.equals("W-L")) {
+							tempSortKey = "W-L%";
+						}
+						
+						String firstVal = (String) o1.get(tempSortKey);
+						String secondVal = (String) o2.get(tempSortKey);
+
+						// handle int types
+						if (sortKey.equals("W") || sortKey.equals("L") || sortKey.equals("PF") || sortKey.equals("PA")
+								|| sortKey.equals("PD")) {
+							int secondValue = Integer.parseInt(secondVal);
+							int firstValue = Integer.parseInt(firstVal);
+							
+							if (sortOrder.equals("DESC"))
+								return Integer.compare(secondValue, firstValue);
+							else
+								return Integer.compare(firstValue, secondValue);
+						}
+						// handle double types
+						else if (sortKey.equals("W-L") || sortKey.equals("Mov") || sortKey.equals("SoS")
+								|| sortKey.equals("SRS") || sortKey.equals("OSRS") || sortKey.equals("DSRS")) {
+							double secondValue = Double.parseDouble(secondVal);
+							double firstValue = Double.parseDouble(firstVal);
+							
+							if (sortOrder.equals("DESC"))
+								return Double.compare(secondValue, firstValue);
+							else 
+								return Double.compare(firstValue, secondValue);
+						}
+
+						// handle String types
+						if (sortOrder.equals("DESC"))
+							return secondVal.compareTo(firstVal);
+						else
+							return firstVal.compareTo(secondVal);
+					}
+				});
+			}
+			//System.out.println(teamsStandings.toJSONString());
 			body.put("data", teamsStandings);
 			this.status = HttpStatus.OK;
 		} catch (Exception e) { // capture failure info
@@ -150,6 +202,7 @@ public class NFLStandingsController extends PokeAbstractController {
 
 	/**
 	 * Retrieve Standings from the team stats
+	 * 
 	 * @param teamStatJSON
 	 * @return
 	 */
@@ -171,6 +224,7 @@ public class NFLStandingsController extends PokeAbstractController {
 
 	/**
 	 * Read NFL data from the rest end point
+	 * 
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
@@ -184,10 +238,5 @@ public class NFLStandingsController extends PokeAbstractController {
 		NFL_STANDINGS = response.body();
 
 		System.out.println("Read " + NFL_STANDINGS.length() + " bytes from NFL Stats API");
-	}
-
-	public static void main(String args) {
-		NFLStandingsController c = new NFLStandingsController();
-		c.getSortedData("a", "b", "c");
 	}
 }
