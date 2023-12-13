@@ -101,6 +101,7 @@ public class NFLStandingsController extends PokeAbstractController {
 	}
 
 	// GET NFL Stats - sorted
+	@SuppressWarnings("unchecked")
 	@GetMapping(value = { "/sorted/", "/sorted", "/sorted/{sortKey}/{sortOrder}/{algorithm}" })
 	public ResponseEntity<JSONObject> getSortedData(@PathVariable(required = false) String sortKey,
 			@PathVariable(required = false) String sortOrder, @PathVariable(required = false) String algorithm) {

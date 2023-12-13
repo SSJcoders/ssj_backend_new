@@ -1,5 +1,5 @@
 package com.nighthawk.spring_portfolio.mvc.poke;
-
+// NOT IN USE
 public class Standings {
 	private String teamName;
 	private int wins;
