@@ -5,23 +5,24 @@ public class BubbleSort {
 		Standings temp;
 		boolean swapped;
 		
+		// outer loop
 		for (int i = 0; i < teamStandings.length - 1; i++) {
+			// initialize swapped to false
 			swapped = false;
 			
+			// inner loop
 			for (int j = 0; j < teamStandings.length - i - 1; j++) {
-				
+				// if ascending order is requested
 				if (ascending) {
 					if (teamStandings[j].getWins() > teamStandings[j + 1].getWins()) {
-
 						// Swap teamStandings[j] and teamStandings[j+1]
 						temp = teamStandings[j];
 						teamStandings[j] = teamStandings[j + 1];
 						teamStandings[j + 1] = temp;
 						swapped = true;
 					}
-				} else {
+				} else { // if descending order is requested
 					if (teamStandings[j].getWins() < teamStandings[j + 1].getWins()) {
-
 						// Swap teamStandings[j] and teamStandings[j+1]
 						temp = teamStandings[j];
 						teamStandings[j] = teamStandings[j + 1];
