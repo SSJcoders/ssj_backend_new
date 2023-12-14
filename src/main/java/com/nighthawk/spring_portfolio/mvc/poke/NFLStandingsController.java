@@ -196,8 +196,9 @@ public class NFLStandingsController extends PokeAbstractController {
 					Standings[] standings = getStandings(teamsStandings);
 					
 					BubbleSort.bubbleSort(standings, sortKey, sortOrder.equals("ASC"));
-					teamsStandings = new JSONArray();
-					teamsStandings.addAll(Arrays.asList(standings));
+					
+					// convert the object array into JSON Array
+					teamsStandings = getJsonArrayFromStandingsData(standings);
 				} else { // this is java default using collections.sort
 					// Collections.sort will sort based on the natural order
 					Collections.sort(teamsStandings, new Comparator<JSONObject>() {
@@ -260,6 +261,30 @@ public class NFLStandingsController extends PokeAbstractController {
 		return new ResponseEntity<>(body, status);
 	}
 
+	private JSONArray getJsonArrayFromStandingsData(Standings[] standings) {
+		JSONArray teamsStandings = new JSONArray();
+		
+		for (Standings aStanding : standings) {
+			JSONObject anObject = new JSONObject();
+			anObject.put("OSRS", aStanding.getOSRS());
+			anObject.put("DSRS", aStanding.getDSRS());
+			anObject.put("PA", aStanding.getPointsFor());
+			anObject.put("PD", aStanding.getPointsDiff());
+			anObject.put("MoV", aStanding.getMarginOfVictory());
+			anObject.put("SRS", aStanding.getSRS());
+			anObject.put("PF", aStanding.getPointsFor());
+			anObject.put("SoS", aStanding.getSOS());
+			anObject.put("W", aStanding.getWins());
+			anObject.put("W-L%", aStanding.getWlPercentage());
+			anObject.put("Tm", aStanding.getTeamName());
+			anObject.put("L", aStanding.getLosses());
+			
+			teamsStandings.add(anObject);
+		}
+		
+		return teamsStandings;
+	}
+
 	private Standings[] getStandings(JSONArray teamsStandings) {
 		// initialize array
 		Standings[] standings = new Standings[teamsStandings.size()];
@@ -277,7 +302,7 @@ public class NFLStandingsController extends PokeAbstractController {
 			int pointsFor = Integer.parseInt((String) jObj.get("PF"));
 			int pointsAgainst = Integer.parseInt((String) jObj.get("PA"));
 			int pointsDiff = Integer.parseInt((String) jObj.get("PD"));
-			double marginOfVictory = Double.parseDouble((String) jObj.get("Mov"));
+			double marginOfVictory = Double.parseDouble((String) jObj.get("MoV"));
 			double SOS = Double.parseDouble((String) jObj.get("SoS"));
 			double SRS = Double.parseDouble((String) jObj.get("SRS"));
 			double OSRS = Double.parseDouble((String) jObj.get("OSRS"));
