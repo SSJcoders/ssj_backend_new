@@ -134,7 +134,9 @@ public class NFLStandingsController extends PokeAbstractController {
 	@GetMapping(value = { "/sorted/", "/sorted", "/sorted/{sortKey}/{sortOrder}/{algorithm}" })
 	public ResponseEntity<JSONObject> getSortedData(@PathVariable(required = false) String sortKey,
 			@PathVariable(required = false) String sortOrder, @PathVariable(required = false) String algorithm) {
-
+		// to track how long it took to sort
+		long sortTime = 0l;
+		
 		try {
 			// if the cached file doesn't exist or is empty,
 			// then read the data from the NFL Standings REST endpoint
@@ -195,12 +197,17 @@ public class NFLStandingsController extends PokeAbstractController {
 					// Standings class is a POJO (Plain Old Java Object)
 					Standings[] standings = getStandings(teamsStandings);
 					
+					long startTime = System.currentTimeMillis();
+					
 					BubbleSort.bubbleSort(standings, sortKey, sortOrder.equals("ASC"));
 					
+					sortTime = System.currentTimeMillis() - startTime; 
 					// convert the object array into JSON Array
 					teamsStandings = getJsonArrayFromStandingsData(standings);
 				} else { // this is java default using collections.sort
 					// Collections.sort will sort based on the natural order
+					long startTime = System.currentTimeMillis();
+					
 					Collections.sort(teamsStandings, new Comparator<JSONObject>() {
 						public int compare(JSONObject o1, JSONObject o2) {
 							String tempSortKey = sortKey;
@@ -243,11 +250,14 @@ public class NFLStandingsController extends PokeAbstractController {
 								return firstVal.compareTo(secondVal);
 						}
 					});
+					
+					sortTime = System.currentTimeMillis() - startTime; 
 				}
 			}
 			// System.out.println(teamsStandings.toJSONString());
 			body.put("data", teamsStandings);
 			this.status = HttpStatus.OK;
+			System.out.println("Sort time: "+ sortTime + " ms for " + algorithm);
 		} catch (Exception e) { // capture failure info
 			HashMap<String, String> status = new HashMap<>();
 			status.put("status", "Api failure: " + e.getMessage());
