@@ -54,6 +54,7 @@ public class BubbleSort {
 					} else if (sortKey.equals("PA")) {
 						firstNum = teamStandings[j].getPointsAgainst();
 						secondNum = teamStandings[j + 1].getPointsAgainst();
+						//System.out.println("First: " + firstNum + " | Second Num: " + secondNum);
 					} else if (sortKey.equals("PD")) {
 						firstNum = teamStandings[j].getPointsDiff();
 						secondNum = teamStandings[j + 1].getPointsDiff();

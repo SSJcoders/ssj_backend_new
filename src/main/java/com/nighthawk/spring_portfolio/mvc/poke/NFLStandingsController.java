@@ -278,7 +278,7 @@ public class NFLStandingsController extends PokeAbstractController {
 			JSONObject anObject = new JSONObject();
 			anObject.put("OSRS", aStanding.getOSRS());
 			anObject.put("DSRS", aStanding.getDSRS());
-			anObject.put("PA", aStanding.getPointsFor());
+			anObject.put("PA", aStanding.getPointsAgainst());
 			anObject.put("PD", aStanding.getPointsDiff());
 			anObject.put("MoV", aStanding.getMarginOfVictory());
 			anObject.put("SRS", aStanding.getSRS());
