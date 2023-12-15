@@ -232,7 +232,7 @@ public class NFLStandingsController extends PokeAbstractController {
 									return Integer.compare(firstValue, secondValue);
 							}
 							// handle double types
-							else if (sortKey.equals("W-L") || sortKey.equals("Mov") || sortKey.equals("SoS")
+							else if (sortKey.equals("W-L") || sortKey.equals("MoV") || sortKey.equals("SoS")
 									|| sortKey.equals("SRS") || sortKey.equals("OSRS") || sortKey.equals("DSRS")) {
 								double secondValue = Double.parseDouble(secondVal);
 								double firstValue = Double.parseDouble(firstVal);

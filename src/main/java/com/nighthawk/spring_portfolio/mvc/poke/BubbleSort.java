@@ -80,7 +80,7 @@ public class BubbleSort {
 							swapped = true;
 						}
 					}
-				} else if (sortKey.equals("W-L") || sortKey.equals("Mov") || sortKey.equals("SoS")
+				} else if (sortKey.equals("W-L") || sortKey.equals("MoV") || sortKey.equals("SoS")
 						|| sortKey.equals("SRS") || sortKey.equals("OSRS") || sortKey.equals("DSRS")) {
 					double firstNum = 0;
 					double secondNum = 0;
@@ -88,7 +88,7 @@ public class BubbleSort {
 					if (sortKey.equals("W-L")) {
 						firstNum = teamStandings[j].getWlPercentage();
 						secondNum = teamStandings[j + 1].getWlPercentage();
-					} else if (sortKey.equals("Mov")) {
+					} else if (sortKey.equals("MoV")) {
 						firstNum = teamStandings[j].getMarginOfVictory();
 						secondNum = teamStandings[j + 1].getMarginOfVictory();
 					} else if (sortKey.equals("SoS")) {
